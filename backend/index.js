@@ -1,41 +1,35 @@
 import express from "express";
+import multer from "multer";
 import mongoose from "mongoose";
-import checkAuth from "./utils/checkAuth.js";
-import * as UserController from "./controllers/UserController.js";
-import * as PostController from "./controllers/PostController.js";
-import {
-  loginValidation,
-  postCreateValidation,
-  registerValidation,
-} from "./validations.js";
+import authRoutes from "./routes/auth.js";
+import postRoutes from "./routes/posts.js";
 
 mongoose
   .connect(
-    `mongodb+srv://admin:257AbhIjrOsyb5Vz@cluster0.zxupgpk.mongodb.net/blog?appName=Cluster0`
+    "mongodb+srv://admin:257AbhIjrOsyb5Vz@cluster0.zxupgpk.mongodb.net/blog"
   )
-  .then(() => {
-    console.log("DB ok");
-  })
-  .catch((err) => ("DB error", err));
+  .then(() => console.log("✅ DB connected"))
+  .catch((err) => console.error("❌ DB connection error:", err));
 
 const app = express();
 
+const storage = multer.diskStorage({
+  destination: (_, __, cb) => cb(null, "uploads"),
+  filename: (_, file, cb) => cb(null, file.originalname),
+});
+const upload = multer({ storage });
+
 app.use(express.json());
+app.use("/uploads", express.static("uploads"));
 
-app.get("/auth/me", checkAuth, UserController.getMe);
+app.use("/auth", authRoutes);
+app.use("/posts", postRoutes);
 
-app.post("/auth/login", loginValidation, UserController.login);
-app.post("/auth/register", registerValidation, UserController.register);
-
-app.get("/posts", PostController.getAll);
-app.get("/posts/:id", PostController.getOne);
-app.post("/posts", checkAuth, postCreateValidation, PostController.create);
-app.delete("/posts/:id", checkAuth, PostController.remove);
-app.patch("/posts/:id", checkAuth, PostController.update);
+app.post("/upload", upload.single("image"), (req, res) => {
+  res.json({ url: `/uploads/${req.file.originalname}` });
+});
 
 app.listen(5000, (err) => {
-  if (err) {
-    return console.log(err);
-  }
-  console.log(`Server ok`);
+  if (err) return console.error(err);
+  console.log("🚀 Server running on port 5000");
 });
