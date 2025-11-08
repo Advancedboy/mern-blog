@@ -3,11 +3,12 @@ import multer from "multer";
 import mongoose from "mongoose";
 import authRoutes from "./routes/auth.js";
 import postRoutes from "./routes/posts.js";
+import checkAuth from "./utils/checkAuth.js";
+import dotenv from "dotenv";
+dotenv.config({ path: ".env" });
 
 mongoose
-  .connect(
-    "mongodb+srv://admin:257AbhIjrOsyb5Vz@cluster0.zxupgpk.mongodb.net/blog"
-  )
+  .connect(process.env.MONGODB_URL)
   .then(() => console.log("✅ DB connected"))
   .catch((err) => console.error("❌ DB connection error:", err));
 
@@ -25,7 +26,7 @@ app.use("/uploads", express.static("uploads"));
 app.use("/auth", authRoutes);
 app.use("/posts", postRoutes);
 
-app.post("/upload", upload.single("image"), (req, res) => {
+app.post("/upload", checkAuth, upload.single("image"), (req, res) => {
   res.json({ url: `/uploads/${req.file.originalname}` });
 });
 
