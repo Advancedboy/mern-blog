@@ -5,6 +5,7 @@ import authRoutes from "./routes/auth.js";
 import postRoutes from "./routes/posts.js";
 import checkAuth from "./utils/checkAuth.js";
 import dotenv from "dotenv";
+import cors from "cors";
 dotenv.config({ path: ".env" });
 
 mongoose
@@ -21,6 +22,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 app.use(express.json());
+app.use(cors());
 app.use("/uploads", express.static("uploads"));
 
 app.use("/auth", authRoutes);
@@ -31,7 +33,7 @@ app.post("/upload", checkAuth, upload.single("image"), (req, res) => {
   res.json({ url: `/uploads/${req.file.originalname}` });
 });
 
-app.listen(5000, (err) => {
+app.listen(4444, (err) => {
   if (err) return console.error(err);
-  console.log("Server running on port 5000");
+  console.log("Server running on port 4444");
 });
