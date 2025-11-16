@@ -7,6 +7,7 @@ import { postCreateValidation } from "../validations.js";
 const router = express.Router();
 
 router.get("/", PostController.getAll);
+router.get("/tags", PostController.getLastTags);
 router.get("/:id", PostController.getOne);
 router.post(
   "/",
